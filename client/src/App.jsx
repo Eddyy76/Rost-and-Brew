@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import ProductCard from './components/ProductCard';
@@ -7,7 +7,6 @@ import AuthModal from './components/AuthModal';
 import OrderSuccess from './components/OrderSuccess';
 import InstantSection from './components/InstantSection';
 import StorySection from './components/StorySection';
-import { products } from './data/products';
 
 function App() {
   // --- REFS FOR SMOOTH SCROLLING ---
@@ -20,12 +19,34 @@ function App() {
   };
 
   // --- STATE MANAGEMENT ---
+  const [products, setProducts] = useState([]); // Now fetched from MongoDB
+  const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
   const [filter, setFilter] = useState('All');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isOrdered, setIsOrdered] = useState(false);
+
+  // --- FETCH LIVE DATA FROM RENDER ---
+  useEffect(() => {
+    // ⚠️ REPLACE THIS URL WITH YOUR RENDER BACKEND URL
+    const API_URL = "https://your-backend-url.onrender.com/api/products";
+
+    fetch(API_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
+      .then((data) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching data:", err);
+        setLoading(false);
+      });
+  }, []);
 
   // --- LOGIC HANDLERS ---
   const addToCart = (product) => {
@@ -54,16 +75,30 @@ function App() {
     setIsOrdered(false);
   };
 
+  // --- FILTER LOGIC ---
   const filteredProducts = filter === 'All' 
     ? products 
     : products.filter(p => p.type === filter);
 
+  // --- LOADING STATE ---
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-amber-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-amber-600 tracking-[0.3em] uppercase text-xs animate-pulse">Brewing Data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- SUCCESS STATE ---
   if (isOrdered) {
     return <OrderSuccess onBackToShop={resetShop} />;
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] selection:bg-amber-500/30">
+    <div className="min-h-screen bg-[#050505] selection:bg-amber-500/30 text-white">
       <Navbar 
         cartCount={cart.length} 
         onCartClick={() => setIsCartOpen(true)} 
@@ -120,13 +155,19 @@ function App() {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {filteredProducts.map((product) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-              onAddToCart={() => addToCart(product)} 
-            />
-          ))}
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <ProductCard 
+                key={product._id || product.id} 
+                product={product} 
+                onAddToCart={() => addToCart(product)} 
+              />
+            ))
+          ) : (
+            <p className="text-zinc-500 col-span-full text-center py-20 uppercase tracking-widest text-xs">
+              No beans found in the vault.
+            </p>
+          )}
         </div>
       </section>
 
