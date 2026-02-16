@@ -31,7 +31,14 @@ function App() {
   // --- FETCH LIVE DATA FROM RENDER ---
   useEffect(() => {
     // ⚠️ REPLACE THIS URL WITH YOUR RENDER BACKEND URL
-    const API_URL = "https://your-backend-url.onrender.com/api/products";
+   const SERVER_URL = "https://your-server-name.onrender.com/api/products"; 
+
+useEffect(() => {
+  fetch(SERVER_URL)
+    .then(res => res.json())
+    .then(data => setProducts(data))
+    .catch(err => console.error("Connection failed:", err));
+}, []);
 
     fetch(API_URL)
       .then((res) => {
