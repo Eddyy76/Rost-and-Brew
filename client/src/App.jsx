@@ -19,7 +19,7 @@ function App() {
   };
 
   // --- STATE MANAGEMENT ---
-  const [products, setProducts] = useState([]); // Now fetched from MongoDB
+  const [products, setProducts] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
@@ -28,21 +28,14 @@ function App() {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isOrdered, setIsOrdered] = useState(false);
 
-  // --- FETCH LIVE DATA FROM RENDER ---
+  // --- CLIENT-SERVER COMMUNICATION ---
   useEffect(() => {
-    // ⚠️ REPLACE THIS URL WITH YOUR RENDER BACKEND URL
-   const SERVER_URL = "https://your-server-name.onrender.com/api/products"; 
+    // ⚠️ REPLACE THIS WITH YOUR ACTUAL RENDER URL
+    const SERVER_URL = "https://roast-and-brew-backend.onrender.com/api/products"; 
 
-useEffect(() => {
-  fetch(SERVER_URL)
-    .then(res => res.json())
-    .then(data => setProducts(data))
-    .catch(err => console.error("Connection failed:", err));
-}, []);
-
-    fetch(API_URL)
+    fetch(SERVER_URL)
       .then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
+        if (!res.ok) throw new Error("Server response was not ok");
         return res.json();
       })
       .then((data) => {
@@ -50,10 +43,10 @@ useEffect(() => {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Error fetching data:", err);
+        console.error("Connection failed:", err);
         setLoading(false);
       });
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
   // --- LOGIC HANDLERS ---
   const addToCart = (product) => {
@@ -179,14 +172,10 @@ useEffect(() => {
       </section>
 
       {/* SECTION 2: INSTANT TECH */}
-      <section ref={instantRef}>
-        <InstantSection />
-      </section>
+      <section ref={instantRef}><InstantSection /></section>
 
       {/* SECTION 3: OUR STORY */}
-      <section ref={storyRef}>
-        <StorySection />
-      </section>
+      <section ref={storyRef}><StorySection /></section>
 
       <footer className="mt-20 border-t border-white/5 py-12 text-center">
         <p className="text-zinc-700 text-[9px] tracking-[0.5em] uppercase">
